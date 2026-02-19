@@ -94,7 +94,7 @@ const Skills = () => {
 
             <div className="bento-grid" style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(380px, 1fr))',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 380px), 1fr))',
                 gap: '30px'
             }}>
                 {skillGroups.map((group, index) => (

@@ -1,6 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetDescription } from './ui/sheet';
-import { Menu } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
+
+const NAV_ITEMS = [
+    { id: 'home', label: 'Home' },
+    { id: 'summary', label: 'About Me' },
+    { id: 'experience', label: 'Experience' },
+    { id: 'achievements', label: 'Achievements' },
+    { id: 'publications', label: 'Publications' },
+    { id: 'skills', label: 'Skills' },
+    { id: 'projects', label: 'Projects' },
+    { id: 'contact', label: 'Contact' },
+];
 
 const Navbar = () => {
     const [activeSegment, setActiveSegment] = useState('home');
@@ -8,115 +18,107 @@ const Navbar = () => {
 
     useEffect(() => {
         const handleScroll = () => {
-            const sections = ['home', 'summary', 'experience', 'achievements', 'publications', 'skills', 'projects', 'contact'];
-            for (const section of sections) {
-                const element = document.getElementById(section);
-                if (element) {
-                    const rect = element.getBoundingClientRect();
+            for (const item of NAV_ITEMS) {
+                const el = document.getElementById(item.id);
+                if (el) {
+                    const rect = el.getBoundingClientRect();
                     if (rect.top <= 100 && rect.bottom >= 100) {
-                        setActiveSegment(section);
+                        setActiveSegment(item.id);
                         break;
                     }
                 }
             }
         };
-
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
+    // Lock body scroll when menu is open
+    useEffect(() => {
+        document.body.style.overflow = isMenuOpen ? 'hidden' : '';
+        return () => { document.body.style.overflow = ''; };
+    }, [isMenuOpen]);
+
     const scrollTo = (id) => {
-        const element = document.getElementById(id);
-        if (element) {
-            window.scrollTo({
-                top: element.offsetTop - 80,
-                behavior: 'smooth'
-            });
-            setIsMenuOpen(false);
+        const el = document.getElementById(id);
+        if (el) {
+            window.scrollTo({ top: el.offsetTop - 80, behavior: 'smooth' });
         }
+        setIsMenuOpen(false);
     };
 
     return (
-        <nav className={`navbar ${isMenuOpen ? 'menu-open' : ''}`}>
-            <div className="nav-container">
+        <>
+            <nav className="navbar">
+                <div className="nav-container">
+                    {/* Desktop nav links */}
+                    <ul className="nav-links desktop-only">
+                        {NAV_ITEMS.map((item) => (
+                            <li
+                                key={item.id}
+                                className={`nav-link ${activeSegment === item.id ? 'active' : ''}`}
+                                onClick={() => scrollTo(item.id)}
+                            >
+                                {item.label}
+                            </li>
+                        ))}
+                    </ul>
 
-                {/* Desktop Navigation */}
-                <ul className="nav-links desktop-only">
-                    {[
-                        { id: 'home', label: 'Home' },
-                        { id: 'summary', label: 'About Me' },
-                        { id: 'experience', label: 'Experience' },
-                        { id: 'achievements', label: 'Achievements' },
-                        { id: 'publications', label: 'Publications' },
-                        { id: 'skills', label: 'Skills' },
-                        { id: 'projects', label: 'Projects' },
-                        { id: 'contact', label: 'Contact' }
-                    ].map((item) => (
+                    {/* Desktop resume button */}
+                    <div className="nav-cta desktop-only">
+                        <button className="btn-nav-outline" onClick={() => window.open('/resume.pdf', '_blank')}>
+                            Resume <span className="arrow">↗</span>
+                        </button>
+                    </div>
+
+                    {/* Mobile hamburger button */}
+                    <button
+                        className="mobile-menu-btn mobile-only"
+                        onClick={() => setIsMenuOpen(true)}
+                        aria-label="Open menu"
+                    >
+                        <Menu size={26} color="#fff" />
+                    </button>
+                </div>
+            </nav>
+
+            {/* Mobile Drawer Overlay */}
+            <div
+                className={`mobile-overlay ${isMenuOpen ? 'open' : ''}`}
+                onClick={() => setIsMenuOpen(false)}
+            />
+
+            {/* Mobile Drawer Panel */}
+            <div className={`mobile-drawer ${isMenuOpen ? 'open' : ''}`}>
+                <button
+                    className="mobile-drawer-close"
+                    onClick={() => setIsMenuOpen(false)}
+                    aria-label="Close menu"
+                >
+                    <X size={24} color="#fff" />
+                </button>
+
+                <ul className="mobile-nav-list">
+                    {NAV_ITEMS.map((item) => (
                         <li
                             key={item.id}
-                            className={`nav-link ${activeSegment === item.id ? 'active' : ''}`}
+                            className={`mobile-nav-item ${activeSegment === item.id ? 'active' : ''}`}
                             onClick={() => scrollTo(item.id)}
                         >
+                            <span className="mobile-nav-dot" />
                             {item.label}
                         </li>
                     ))}
                 </ul>
 
-                <div className="nav-cta desktop-only">
-                    <button className="btn-nav-outline" onClick={() => window.open('/resume.pdf', '_blank')}>
-                        Resume <span className="arrow">↗</span>
-                    </button>
-                </div>
-
-                {/* Mobile Navigation via Sheet */}
-                <div className="mobile-only">
-                    <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-                        <SheetTrigger asChild>
-                            <button className="burger" style={{ display: 'flex', background: 'transparent', border: 'none', padding: 0 }}>
-                                <Menu className="text-white w-8 h-8" />
-                            </button>
-                        </SheetTrigger>
-                        <SheetContent side="right" style={{ backgroundColor: 'var(--bg-dark)', borderLeft: '1px solid var(--glass-border)' }}>
-                            <SheetTitle className="sr-only">Mobile Menu</SheetTitle>
-                            <SheetDescription className="sr-only">Navigate through the portfolio sections</SheetDescription>
-                            <ul className="nav-links-mobile" style={{
-                                display: 'flex',
-                                flexDirection: 'column',
-                                alignItems: 'center',
-                                gap: '40px',
-                                padding: '40px 0',
-                                listStyle: 'none'
-                            }}>
-                                {[
-                                    { id: 'home', label: 'Home' },
-                                    { id: 'summary', label: 'About Me' },
-                                    { id: 'experience', label: 'Experience' },
-                                    { id: 'achievements', label: 'Achievements' },
-                                    { id: 'publications', label: 'Publications' },
-                                    { id: 'skills', label: 'Skills' },
-                                    { id: 'projects', label: 'Projects' },
-                                    { id: 'contact', label: 'Contact' }
-                                ].map((item) => (
-                                    <li
-                                        key={item.id}
-                                        className={`nav-link ${activeSegment === item.id ? 'active' : ''}`}
-                                        style={{ fontSize: '1.5rem' }}
-                                        onClick={() => scrollTo(item.id)}
-                                    >
-                                        {item.label}
-                                    </li>
-                                ))}
-                                <li>
-                                    <button className="btn-nav-outline" onClick={() => window.open('/resume.pdf', '_blank')}>
-                                        Resume ↗
-                                    </button>
-                                </li>
-                            </ul>
-                        </SheetContent>
-                    </Sheet>
-                </div>
+                <button
+                    className="mobile-resume-btn"
+                    onClick={() => { window.open('/resume.pdf', '_blank'); setIsMenuOpen(false); }}
+                >
+                    Resume ↗
+                </button>
             </div>
-        </nav>
+        </>
     );
 };
 

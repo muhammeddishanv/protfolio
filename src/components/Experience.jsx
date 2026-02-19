@@ -149,6 +149,26 @@ const Experience = () => {
                     ))}
                 </div>
             </div>
+            <style>
+                {`
+                    @media (max-width: 640px) {
+                        #experience {
+                            padding: 60px 15px !important;
+                        }
+                        #experience .animate-fade-in {
+                            padding-left: 30px !important;
+                        }
+                        #experience .animate-fade-in > div:first-child {
+                            left: 0px !important;
+                            width: 16px !important;
+                            height: 16px !important;
+                        }
+                        #experience > div:last-child > div:first-child {
+                            left: 7px !important;
+                        }
+                    }
+                `}
+            </style>
         </section>
     );
 };

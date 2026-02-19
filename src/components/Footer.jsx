@@ -1,7 +1,28 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 const Footer = () => {
+  const [isVisible, setIsVisible] = useState(false);
+  const footerRef = useRef(null);
   const currentYear = new Date().getFullYear();
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsVisible(entry.isIntersecting);
+      },
+      { threshold: 0.1 }
+    );
+
+    if (footerRef.current) {
+      observer.observe(footerRef.current);
+    }
+
+    return () => {
+      if (footerRef.current) {
+        observer.unobserve(footerRef.current);
+      }
+    };
+  }, []);
 
   const scrollToTop = () => {
     window.scrollTo({
@@ -11,12 +32,15 @@ const Footer = () => {
   };
 
   return (
-    <footer style={{
-      padding: '80px 40px 40px',
-      background: 'var(--bg-dark)',
-      borderTop: '1px solid var(--glass-border)',
-      position: 'relative'
-    }}>
+    <footer
+      ref={footerRef}
+      style={{
+        padding: '80px 40px 40px',
+        background: 'var(--bg-dark)',
+        borderTop: '1px solid var(--glass-border)',
+        position: 'relative'
+      }}
+    >
       <div style={{
         maxWidth: '1400px',
         margin: '0 auto',
@@ -121,34 +145,36 @@ const Footer = () => {
       </div>
 
       {/* Scroll to Top Button */}
-      <button
-        onClick={scrollToTop}
-        style={{
-          position: 'absolute',
-          right: '40px',
-          bottom: '40px',
-          width: '50px',
-          height: '50px',
-          borderRadius: '50%',
-          background: 'linear-gradient(135deg, var(--accent-cyan), var(--accent-emerald))',
-          border: 'none',
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: '#000',
-          boxShadow: '0 10px 20px rgba(0, 255, 204, 0.3)',
-          transition: 'all 0.3s ease',
-          zIndex: 10
-        }}
-        className="scroll-to-top"
-        onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-5px)'}
-        onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
-      >
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M18 15l-6-6-6 6" />
-        </svg>
-      </button>
+      {isVisible && (
+        <button
+          onClick={scrollToTop}
+          style={{
+            position: 'fixed',
+            right: '40px',
+            bottom: '40px',
+            width: '50px',
+            height: '50px',
+            borderRadius: '50%',
+            background: 'linear-gradient(135deg, var(--accent-cyan), var(--accent-emerald))',
+            border: 'none',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#000',
+            boxShadow: '0 10px 20px rgba(0, 255, 204, 0.3)',
+            transition: 'all 0.3s ease',
+            zIndex: 10
+          }}
+          className="scroll-to-top"
+          onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-5px)'}
+          onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M18 15l-6-6-6 6" />
+          </svg>
+        </button>
+      )}
 
       <style>
         {`
@@ -163,9 +189,12 @@ const Footer = () => {
                             grid-template-columns: 1fr !important;
                         }
                         .scroll-to-top {
-                            position: fixed;
-                            bottom: 20px;
-                            right: 20px;
+                            position: fixed !important;
+                            bottom: 100px !important;
+                            right: 20px !important;
+                        }
+                        footer {
+                            padding: 60px 20px 40px !important;
                         }
                     }
                 `}
